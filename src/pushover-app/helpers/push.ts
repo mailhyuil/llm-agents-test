@@ -1,21 +1,11 @@
 import dotenv from "dotenv";
-import process from "process";
 
 dotenv.config();
 const pushoverToken = process.env.PUSHOVER_TOKEN;
 const pushoverUser = process.env.PUSHOVER_USER;
 const pushoverEndpoint = "https://api.pushover.net/1/messages.json";
 
-async function main() {
-  // const { text } = await generateText({
-  //   model: openai("gpt-4o-mini"),
-  //   prompt: "What is the capital of France?",
-  // });
-  // console.log(text);
-  push("Hello World!");
-}
-
-async function push(message: string) {
+export async function push(message: string) {
   console.log(`Push: ${message}`);
 
   if (!pushoverToken || !pushoverUser) {
@@ -50,4 +40,3 @@ async function push(message: string) {
     console.error("푸시 알림 전송 중 오류 발생:", error);
   }
 }
-main();
