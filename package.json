@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "db": "docker run --name pg -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=mydb postgres",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/pushover-app/app.js",
     "dev": "ts-node src/app.ts",
@@ -20,6 +21,8 @@
     "@ai-sdk/openai": "^2.0.53",
     "@langchain/community": "^1.0.0",
     "@langchain/core": "^1.0.1",
+    "@langchain/langgraph-checkpoint-postgres": "^1.0.0",
+    "@langchain/langgraph-checkpoint-sqlite": "^1.0.0",
     "@langchain/openai": "^1.0.0",
     "@openai/agents": "^0.2.1",
     "ai": "^5.0.78",
@@ -30,6 +33,7 @@
     "multer": "^1.4.5-lts.1",
     "openai": "^6.7.0",
     "pdf-parse": "^1.1.1",
+    "pg": "^8.16.3",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -40,6 +44,7 @@
     "@types/node": "^24.9.1",
     "@types/pdf-parse": "^1.1.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   }
 }
