@@ -4,6 +4,7 @@ import { User, userSchema } from "../dto/user";
 export const payment = async (user: User) => {
   try {
     console.log("결제를 요청합니다.");
+    await delay(2000);
     console.log("결제가 완료되었습니다.");
     return {
       status: "success",
@@ -23,3 +24,4 @@ export const paymentTool = tool(payment, {
   description: "결제를 요청합니다.",
   schema: userSchema,
 });
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

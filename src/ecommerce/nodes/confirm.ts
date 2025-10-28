@@ -17,10 +17,10 @@ export const confirm = async (state: typeof EcommerceAnnotation.State) => {
 
   if (res === "예") {
     return new Command({
-      goto: END,
+      goto: "worker",
       update: {
         status: "success",
-        messages: [new AIMessage({ content: "결제가 완료되었습니다." })],
+        messages: [new AIMessage({ content: "payment tool을 호출합니다." })],
       },
     });
   } else {

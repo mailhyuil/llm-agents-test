@@ -8,7 +8,7 @@ export const inputUserData = async () => {
   const config = getConfig();
   const { user } = config?.configurable as { user: User };
   if (!user.cart) {
-    console.log("cart is empty");
+    console.log("장바구니가 비어있습니다.");
     return {
       status: "error",
       message: "장바구니가 비어있습니다.",
