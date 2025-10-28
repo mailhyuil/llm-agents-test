@@ -19,7 +19,7 @@ export const payment = async (user: User) => {
   }
 };
 export const paymentTool = tool(payment, {
-  name: "payment-tool",
+  name: "payment",
   description: "결제를 요청합니다.",
   schema: userSchema,
 });

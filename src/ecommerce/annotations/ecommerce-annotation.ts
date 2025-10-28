@@ -1,11 +1,9 @@
 import { Annotation, MessagesAnnotation } from "@langchain/langgraph";
 import z from "zod";
-import { User, user, userSchema } from "./dto/user";
 
 type Status = "processing" | "canceled" | "succeeded";
 
 export const ecommerceSchema = z.object({
-  user: userSchema,
   status: z.enum(["processing", "canceled", "succeeded"]),
   success_criteria: z.string(),
   feedback_on_work: z.string(),
@@ -15,12 +13,6 @@ export const ecommerceSchema = z.object({
 
 export const EcommerceAnnotation = Annotation.Root({
   ...MessagesAnnotation.spec,
-  user: Annotation<User>({
-    default: () => user,
-    reducer: (state, value) => {
-      return value;
-    },
-  }),
   status: Annotation<Status>({
     default: () => "processing",
     reducer: (state, value) => {

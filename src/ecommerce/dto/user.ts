@@ -20,10 +20,10 @@ export const userSchema = z.object({
 });
 export const user: User = {
   id: "1",
-  name: "유휴일",
-  email: "mailhyuil@gmail.com",
-  address: "123 Main St, Anytown, USA",
-  phone: "010-7502-0301",
-  paymentMethod: "credit_card",
+  name: "",
+  email: "",
+  address: "",
+  phone: "",
+  paymentMethod: "",
   cart,
 };
