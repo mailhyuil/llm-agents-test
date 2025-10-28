@@ -1,4 +1,4 @@
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
+import { BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { END, START, StateGraph } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import { ChatOpenAI } from "@langchain/openai";
@@ -7,6 +7,7 @@ import { inputDataTool } from "../helpers/input-data";
 import { pushTool } from "../helpers/push";
 import { EvaluatorAnnotation } from "./annotation";
 import { evaluator } from "./evaluator";
+import { routeBasedOnEvaluation, workerRouter } from "./routers";
 dotenv.config();
 const tools = [pushTool, inputDataTool];
 // Create a model and give it access to the tools
@@ -16,13 +17,6 @@ const model = new ChatOpenAI({
 }).bindTools(tools);
 
 /*#### 1. Define State Classes ####*/
-function workerRouter({ messages }: typeof EvaluatorAnnotation.State) {
-  const lastMessage = messages[messages.length - 1] as AIMessage;
-  if (lastMessage.tool_calls?.length) {
-    return "tools";
-  }
-  return "evaluator";
-}
 
 /**
  * 워커 노드에서 툴 및 성공 조건을 참고하여 LLM 호출을 담당하는 함수입니다.
@@ -80,13 +74,6 @@ ${state.feedback_on_work}
     return {
       messages: [new SystemMessage({ content: "작업 처리 중 오류가 발생했습니다. 다시 시도해 주세요." })],
     };
-  }
-}
-function routeBasedOnEvaluation(state: typeof EvaluatorAnnotation.State) {
-  if (state.success_criteria_met || state.user_input_needed) {
-    return END;
-  } else {
-    return "worker";
   }
 }
 
