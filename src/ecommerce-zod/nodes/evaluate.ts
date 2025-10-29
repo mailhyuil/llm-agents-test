@@ -1,19 +1,16 @@
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
 
-import z from "zod";
 import { evaluator } from "../agents/evaluator";
 import { config } from "../config";
 import { formatConversation } from "../helpers/format-conversation";
-import { ecommerceSchema } from "../schema/ecommerce-schema";
+import { EcommerceStateType } from "../schema/ecommerce-schema";
 
 /**
  * 어시스턴트의 응답을 평가하여 작업 완료 여부를 결정하는 함수입니다.
  * @param state - 현재 상태 객체
  * @returns 평가 결과가 포함된 새로운 상태 객체
  */
-export async function evaluate(
-  state: z.infer<typeof ecommerceSchema>,
-): Promise<Partial<z.infer<typeof ecommerceSchema>>> {
+export async function evaluate(state: EcommerceStateType) {
   const lastResponse = state.messages[state.messages.length - 1].content;
 
   const systemMessage = `당신은 어시스턴트가 작업을 성공적으로 완료했는지 평가하는 평가자입니다.
@@ -51,7 +48,7 @@ export async function evaluate(
       new AIMessage({ content: `평가자 피드백: ${evalResult.structuredResponse.feedback}` }),
     ];
 
-    const newState: Partial<z.infer<typeof ecommerceSchema>> = {
+    const newState: Partial<EcommerceStateType> = {
       ...state,
       messages: newMessages,
       feedback_on_work: evalResult.structuredResponse.feedback,
@@ -63,7 +60,7 @@ export async function evaluate(
   } catch (error) {
     console.error("평가자 실행 중 오류 발생:", error);
     // 오류 발생 시 기본 상태 반환 또는 오류 처리
-    const newState: Partial<z.infer<typeof ecommerceSchema>> = {
+    const newState: Partial<EcommerceStateType> = {
       messages: [new SystemMessage({ content: "평가 중 오류가 발생했습니다." })],
       user_input_needed: true, // 오류 발생 시 사용자 입력이 필요하다고 가정
     };

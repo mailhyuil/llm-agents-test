@@ -1,9 +1,8 @@
-import z from "zod";
 import worker from "../agents/worker";
 import { config } from "../config";
-import { ecommerceSchema } from "../schema/ecommerce-schema";
+import { EcommerceStateType } from "../schema/ecommerce-schema";
 
-export async function callWorker(state: z.infer<typeof ecommerceSchema>) {
+export async function callWorker(state: EcommerceStateType) {
   const response = await worker.invoke(state, config);
   return {
     messages: response.messages,

@@ -1,12 +1,12 @@
 import { tool } from "@langchain/core/tools";
 import { getConfig } from "@langchain/langgraph";
 import z from "zod";
-import { User } from "../dto/user";
 import { ask } from "../helpers/ask";
+import { UserType } from "../schema/user-schema";
 
 export const inputUserData = async () => {
   const config = getConfig();
-  const { user } = config?.configurable as { user: User };
+  const { user } = config?.configurable as { user: UserType };
   if (!user.cart) {
     console.log("장바구니가 비어있습니다.");
     return {
@@ -41,7 +41,7 @@ export const inputUserData = async () => {
     );
 
     if (typeof paymentMethod === "string") {
-      user.paymentMethod = paymentMethod;
+      user.paymentMethod = paymentMethod as "credit_card" | "paypal" | "bank_transfer";
     } else
       return {
         status: "error",

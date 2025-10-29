@@ -2,7 +2,6 @@ import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { Command, END, INTERRUPT, isInterrupted, START, StateGraph } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import dotenv from "dotenv";
-import z from "zod";
 import { tools } from "./agents/worker";
 import { config } from "./config";
 import { user } from "./dto/user";
@@ -12,7 +11,7 @@ import { confirm } from "./nodes/confirm";
 import { evaluate } from "./nodes/evaluate";
 import { routeBasedOnEvaluation } from "./routers/evaluator-router";
 import { workerRouter } from "./routers/worker-router";
-import { ecommerceSchema } from "./schema/ecommerce-schema";
+import { ecommerceSchema, EcommerceStateType } from "./schema/ecommerce-schema";
 dotenv.config();
 
 const workflow = new StateGraph(ecommerceSchema)
@@ -28,7 +27,7 @@ const workflow = new StateGraph(ecommerceSchema)
 const app = workflow.compile();
 
 async function invokePaymentWorkflow(message: string) {
-  const initialState: z.infer<typeof ecommerceSchema> = {
+  const initialState: EcommerceStateType = {
     status: "processing",
     success_criteria: `address, paymentMethod, name, email, phone 이 모두 입력되어야 합니다.
 phone은 /^010-\d{4}-\d{4}$/ 정규식 형식으로 입력되어야 합니다.
@@ -61,7 +60,9 @@ paymentMethod는 credit card, paypal, bank transfer 중 하나로 입력되어�
       new HumanMessage(message),
     ],
   };
+
   const result = await app.invoke(initialState, config);
+  console.log("통과");
   // confirm //
   if (isInterrupted(result)) {
     let res = "";

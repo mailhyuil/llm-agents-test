@@ -1,8 +1,7 @@
 import { AIMessage } from "@langchain/core/messages";
-import z from "zod";
-import { ecommerceSchema } from "../schema/ecommerce-schema";
+import { EcommerceStateType } from "../schema/ecommerce-schema";
 
-export const workerRouter = async (state: z.infer<typeof ecommerceSchema>) => {
+export const workerRouter = async (state: EcommerceStateType) => {
   if ((state.messages[state.messages.length - 1] as AIMessage).tool_calls?.length) {
     return "tools";
   }

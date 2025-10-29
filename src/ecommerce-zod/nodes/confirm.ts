@@ -1,10 +1,9 @@
 import { AIMessage } from "@langchain/core/messages";
 import { Command, END, getConfig, interrupt } from "@langchain/langgraph";
-import z from "zod";
 import { User } from "../dto/user";
-import { ecommerceSchema } from "../schema/ecommerce-schema";
+import { EcommerceStateType } from "../schema/ecommerce-schema";
 
-export const confirm = async (state: z.infer<typeof ecommerceSchema>) => {
+export const confirm = async (state: EcommerceStateType) => {
   const config = getConfig();
   const { user } = config?.configurable as { user: User };
 

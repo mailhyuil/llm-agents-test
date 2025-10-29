@@ -1,7 +1,7 @@
 import { tool } from "@langchain/core/tools";
-import { User, userSchema } from "../dto/user";
+import { userSchema, UserType } from "../schema/user-schema";
 
-export const payment = async (user: User) => {
+export const payment = async (user: UserType) => {
   try {
     console.log("결제를 요청합니다.");
     await delay(2000);
@@ -19,9 +19,11 @@ export const payment = async (user: User) => {
     };
   }
 };
+
 export const paymentTool = tool(payment, {
   name: "payment",
   description: "결제를 요청합니다.",
   schema: userSchema,
 });
+
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
