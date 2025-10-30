@@ -1,9 +1,9 @@
-import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { Command, END, INTERRUPT, isInterrupted, START, StateGraph } from "@langchain/langgraph";
 import { ToolNode } from "@langchain/langgraph/prebuilt";
 import dotenv from "dotenv";
+import { HumanMessage, SystemMessage } from "langchain";
 import { tools } from "./agents/worker";
-import { config } from "./config";
+import { checkpointer, config } from "./config";
 import { user } from "./dto/user";
 import { ask } from "./helpers/ask";
 import { callWorker } from "./nodes/call-worker";
@@ -11,10 +11,11 @@ import { confirm } from "./nodes/confirm";
 import { evaluate } from "./nodes/evaluate";
 import { routeBasedOnEvaluation } from "./routers/evaluator-router";
 import { workerRouter } from "./routers/worker-router";
-import { ecommerceSchema, EcommerceStateType } from "./schema/ecommerce-schema";
+import { contextSchema } from "./schema/context-schema";
+import { ecommerceSchema, EcommerceSchemaType } from "./schema/ecommerce-schema";
 dotenv.config();
 
-const workflow = new StateGraph(ecommerceSchema)
+const workflow = new StateGraph(ecommerceSchema, contextSchema)
   .addNode("worker", callWorker)
   .addNode("tools", new ToolNode(tools))
   .addNode("evaluate", evaluate)
@@ -24,16 +25,12 @@ const workflow = new StateGraph(ecommerceSchema)
   .addConditionalEdges("evaluate", routeBasedOnEvaluation, { worker: "worker", confirm: "confirm" })
   .addConditionalEdges("worker", workerRouter, { tools: "tools", evaluate: "evaluate" });
 
-const app = workflow.compile();
+const graph = workflow.compile({ checkpointer: checkpointer });
 
 async function invokePaymentWorkflow(message: string) {
-  const initialState: EcommerceStateType = {
+  const initialState: EcommerceSchemaType = {
     status: "processing",
-    success_criteria: `address, paymentMethod, name, email, phone 이 모두 입력되어야 합니다.
-phone은 /^010-\d{4}-\d{4}$/ 정규식 형식으로 입력되어야 합니다.
-paymentMethod는 credit card, paypal, bank transfer 중 하나로 입력되어야 합니다.
-이메일은 이메일 형식으로 입력되어야 합니다.
-`,
+    success_criteria: `address, paymentMethod, name, email, phone 이 모두 입력되어야 합니다.`,
     feedback_on_work: "",
     success_criteria_met: false,
     user_input_needed: false,
@@ -41,7 +38,7 @@ paymentMethod는 credit card, paypal, bank transfer 중 하나로 입력되어�
       new SystemMessage(
         `당신은 전자상거래 결제 어시스턴트입니다. 도구를 사용하여 사용자의 결제 정보를 수집하고 처리합니다.
 
-중요한 규칙:
+중요한 규칙: 
 1. 사용자가 결제를 요청했을 때, name, email, address, paymentMethod 중 하나라도 누락되면 반드시 "input-user-data"을 호출하세요.
 2. 모든 정보가 완성되면 "payment-tool"을 호출하세요.
 3. 절대로 사용자에게 직접 텍스트로 정보를 요청하지 마세요. 반드시 도구를 사용하세요.
@@ -60,9 +57,7 @@ paymentMethod는 credit card, paypal, bank transfer 중 하나로 입력되어�
       new HumanMessage(message),
     ],
   };
-
-  const result = await app.invoke(initialState, config);
-  console.log("통과");
+  const result = await graph.invoke(initialState, config);
   // confirm //
   if (isInterrupted(result)) {
     let res = "";
@@ -73,7 +68,7 @@ paymentMethod는 credit card, paypal, bank transfer 중 하나로 입력되어�
       }
       console.log("예 또는 아니오를 입력해주세요.");
     }
-    const result2 = await app.invoke(new Command({ resume: res }), config);
+    const result2 = await graph.invoke(new Command({ resume: res }), config);
     console.log(result2.messages[result2.messages.length - 1].content);
   }
 }

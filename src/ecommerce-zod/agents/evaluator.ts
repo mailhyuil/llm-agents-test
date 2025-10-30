@@ -1,6 +1,4 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { createAgent, providerStrategy } from "langchain";
-import { checkpointer } from "../config";
 import { evaluatorSchema } from "../schema/evaluator-schema";
 
 const evaluatorModel = new ChatOpenAI({
@@ -8,10 +6,4 @@ const evaluatorModel = new ChatOpenAI({
   temperature: 0,
   maxTokens: 1000,
 });
-
-export const evaluator = createAgent({
-  name: "evaluator",
-  model: evaluatorModel,
-  checkpointer: checkpointer,
-  responseFormat: providerStrategy(evaluatorSchema),
-});
+export const evaluator = evaluatorModel.withStructuredOutput(evaluatorSchema);

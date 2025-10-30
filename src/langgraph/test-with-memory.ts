@@ -58,16 +58,6 @@ async function work() {
       config,
     );
     console.log(second.messages[second.messages.length - 1].content);
-    const histories = app.getStateHistory(config);
-    console.log("histories");
-    for await (const state of histories) {
-      if (state.values.messages[state.values.messages.length - 1]?.content) {
-        console.log(state.values.messages[state.values.messages.length - 1].content);
-      }
-    }
-    console.log("getState");
-    const state = await app.getState(config);
-    console.log(state.values.messages[state.values.messages.length - 1].content);
   } catch (error) {
     console.error(error);
     throw new Error("an error occurred while working");

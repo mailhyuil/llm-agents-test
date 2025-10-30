@@ -1,12 +1,11 @@
-import { AIMessage } from "@langchain/core/messages";
-import { Command, END, getConfig, interrupt } from "@langchain/langgraph";
-import { User } from "../dto/user";
-import { EcommerceStateType } from "../schema/ecommerce-schema";
+import { Command, END, interrupt, Runtime } from "@langchain/langgraph";
+import { AIMessage } from "langchain";
+import { ContextSchemaType } from "../schema/context-schema";
+import { EcommerceSchemaType } from "../schema/ecommerce-schema";
 
-export const confirm = async (state: EcommerceStateType) => {
-  const config = getConfig();
-  const { user } = config?.configurable as { user: User };
-
+export const confirm = async (state: EcommerceSchemaType, runtime: Runtime<ContextSchemaType>) => {
+  const user = runtime.context?.user;
+  if (!user) throw new Error("User not found");
   const res = interrupt(`결제정보를 확인해주세요.
 상품: ${user.cart.map(item => item.name).join(", ")}
 결제방법: ${user.paymentMethod}

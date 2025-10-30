@@ -1,16 +1,15 @@
-import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "@langchain/core/messages";
-
+import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from "langchain";
 import { evaluator } from "../agents/evaluator";
 import { config } from "../config";
 import { formatConversation } from "../helpers/format-conversation";
-import { EcommerceStateType } from "../schema/ecommerce-schema";
+import { EcommerceSchemaType } from "../schema/ecommerce-schema";
 
 /**
  * 어시스턴트의 응답을 평가하여 작업 완료 여부를 결정하는 함수입니다.
  * @param state - 현재 상태 객체
  * @returns 평가 결과가 포함된 새로운 상태 객체
  */
-export async function evaluate(state: EcommerceStateType) {
+export async function evaluate(state: EcommerceSchemaType) {
   const lastResponse = state.messages[state.messages.length - 1].content;
 
   const systemMessage = `당신은 어시스턴트가 작업을 성공적으로 완료했는지 평가하는 평가자입니다.
@@ -42,25 +41,23 @@ export async function evaluate(state: EcommerceStateType) {
   ];
 
   try {
-    const evalResult = await evaluator.invoke({ messages: evaluatorMessages }, config);
+    const evalResult = await evaluator.invoke(evaluatorMessages, config);
 
-    const newMessages: AIMessage[] = [
-      new AIMessage({ content: `평가자 피드백: ${evalResult.structuredResponse.feedback}` }),
-    ];
+    const newMessages: AIMessage[] = [new AIMessage({ content: `평가자 피드백: ${evalResult.feedback}` })];
 
-    const newState: Partial<EcommerceStateType> = {
+    const newState: Partial<EcommerceSchemaType> = {
       ...state,
       messages: newMessages,
-      feedback_on_work: evalResult.structuredResponse.feedback,
-      success_criteria_met: evalResult.structuredResponse.success_criteria_met,
-      user_input_needed: evalResult.structuredResponse.user_input_needed,
+      feedback_on_work: evalResult.feedback,
+      success_criteria_met: evalResult.success_criteria_met,
+      user_input_needed: evalResult.user_input_needed,
     };
-
+    console.log(newState);
     return newState;
   } catch (error) {
     console.error("평가자 실행 중 오류 발생:", error);
     // 오류 발생 시 기본 상태 반환 또는 오류 처리
-    const newState: Partial<EcommerceStateType> = {
+    const newState: Partial<EcommerceSchemaType> = {
       messages: [new SystemMessage({ content: "평가 중 오류가 발생했습니다." })],
       user_input_needed: true, // 오류 발생 시 사용자 입력이 필요하다고 가정
     };

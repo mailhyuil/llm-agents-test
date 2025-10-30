@@ -1,12 +1,11 @@
-import { tool } from "@langchain/core/tools";
-import { getConfig } from "@langchain/langgraph";
+import { LangGraphRunnableConfig } from "@langchain/langgraph";
+import { tool } from "langchain";
 import z from "zod";
 import { ask } from "../helpers/ask";
-import { UserType } from "../schema/user-schema";
-
-export const inputUserData = async () => {
-  const config = getConfig();
-  const { user } = config?.configurable as { user: UserType };
+const inputUserDataSchema = z.object({});
+export const inputUserData = async (_: z.infer<typeof inputUserDataSchema>, config: LangGraphRunnableConfig) => {
+  const user = config.context?.user;
+  if (!user) throw new Error("User not found");
   if (!user.cart) {
     console.log("장바구니가 비어있습니다.");
     return {
@@ -83,6 +82,7 @@ export const inputUserData = async () => {
 export const inputUserDataTool = tool(inputUserData, {
   name: "input-user-data",
   description: "input name, email, paymentMethod, address from user and return user",
+  schema: inputUserDataSchema,
 });
 
 async function askAndValidate(prompt: string, schema: z.ZodTypeAny) {

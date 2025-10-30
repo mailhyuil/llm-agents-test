@@ -1,10 +1,11 @@
-import worker from "../agents/worker";
+import { worker } from "../agents/worker";
 import { config } from "../config";
-import { EcommerceStateType } from "../schema/ecommerce-schema";
+import { EcommerceSchemaType } from "../schema/ecommerce-schema";
 
-export async function callWorker(state: EcommerceStateType) {
-  const response = await worker.invoke(state, config);
+export async function callWorker(state: EcommerceSchemaType) {
+  const response = await worker.invoke(state.messages, config);
+  console.log(response.content);
   return {
-    messages: response.messages,
+    messages: [response],
   };
 }
